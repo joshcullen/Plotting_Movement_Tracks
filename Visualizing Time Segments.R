@@ -159,7 +159,7 @@ ggplot() +
   geom_tile(data=grid_5f, aes(x=x, y=y), fill="transparent") +
   geom_path(data = borders_5f, aes(x=long, y=lat, group=group), size=0.25) +
   geom_point(data = dat1, aes(grid.x, grid.y, color=time.seg), size=1) +
-  scale_color_viridis_c() +
+  scale_color_viridis_c("Time Segment") +
   labs(x = "Easting", y = "Northing")
 
 
@@ -207,9 +207,11 @@ ggplot() +
   coord_sf(crs = "+init=epsg:32617", xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)),
            ylim = c(min(dat$utmlat-20000), max(dat$utmlat+20000)), expand = FALSE) +
   geom_path(data = attr.cntrs1, aes(x=grid.x, y=grid.y)) +
-  geom_point(data = attr.cntrs1, aes(x=grid.x, y=grid.y, color = time.seg), size=log10(attr.cntrs1$size)*2) +
-  scale_color_viridis_c() +
-  labs(x = "Easting", y = "Northing")
+  geom_point(data = attr.cntrs1, aes(x=grid.x, y=grid.y, color = time.seg), pch=21, stroke=1.5,
+             size=attr.cntrs1$size/sum(attr.cntrs1$size)*100) +
+  scale_color_viridis_c("Time Segment") +
+  labs(x = "Easting", y = "Northing") +
+  theme_bw()
 
 
 dat.size1=matrix(NA,nrow(dat1),1)
