@@ -460,5 +460,5 @@ ggplot() +
 
 ## 3D Plot
 
-Another potential method to view these time series data is by a 3D scatter plot. Since the static version of these plots is not as useful as the dynamic/interactive form, the online hosted version of these plots for [ID 1](https://plot.ly/~joshcullen/2), [ID 2](https://plot.ly/~joshcullen/4), [ID 19](https://plot.ly/~joshcullen/6), and [ID 27](https://plot.ly/~joshcullen/8) have been included.
+Another potential method to view these time series data is by a 3D scatter plot. Since the static version of these plots is not as useful as the dynamic/interactive form, the online hosted version of these plots for [ID 1](https://plot.ly/~joshcullen/28), [ID 12](https://plot.ly/~joshcullen/30), [ID 19](https://plot.ly/~joshcullen/32), and [ID 27](https://plot.ly/~joshcullen/34) have been included.
 
