@@ -85,14 +85,15 @@ dat27<- assign.time.seg(obs27.seg, obs27.breakpts, dat27)
 ### Map
 
 #Load world map data
-world <- ne_countries(scale = "medium", returnclass = "sf")
-usa<- world %>% filter(admin == "United States of America")
+usa <- ne_states(country = "United States of America", returnclass = "sf")
+fl<- usa %>% filter(name == "Florida")
+fl<- st_transform(fl, crs = "+init=epsg:32617") #change projection to UTM 17N
 
 
 #Paths of individual segments
-ggplot(data = usa) +
+ggplot(data = fl) +
   geom_sf() +
-  coord_sf(crs = "+init=epsg:32617", xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)), ylim = c(min(dat$utmlat-20000), max(dat$utmlat+20000)), expand = FALSE) +
+  coord_sf(xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)), ylim = c(min(dat$utmlat-20000), max(dat$utmlat+20000)), expand = FALSE) +
   geom_path(data = dat1, aes(x = utmlong, y = utmlat, color = time.seg)) +
   scale_color_viridis_c("Time Segment") +
   labs(x = "Longitude", y = "Latitude") +
@@ -100,9 +101,9 @@ ggplot(data = usa) +
 
 
 #Paths for segments 1-10
-ggplot(data = usa) +
+ggplot(data = fl) +
   geom_sf() +
-  coord_sf(crs = "+init=epsg:32617", xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)), ylim = c(min(dat$utmlat-20000), max(dat$utmlat+20000)), expand = FALSE) +
+  coord_sf(xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)), ylim = c(min(dat$utmlat-20000), max(dat$utmlat+20000)), expand = FALSE) +
   geom_path(data = dat1[as.numeric(dat1$time.seg) <= 10,], aes(x = utmlong, y = utmlat,
                                                                color  = time.seg)) +
   scale_color_viridis_c() +
@@ -130,14 +131,14 @@ borders_5f<- fortify(borders_5)
 grid_5f<- as.data.frame(grid_5, xy = TRUE)
 
 ggplot() +
-  geom_sf(data = usa) +
-  coord_sf(datum = NA) +
-  coord_sf(crs = "+init=epsg:32617", xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)),
+  geom_sf(data = fl) +
+  coord_sf(xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)),
            ylim = c(min(dat$utmlat-20000), max(dat$utmlat+20000)), expand = FALSE) +
   geom_tile(data=grid_5f, aes(x=x, y=y), fill="transparent") +
   geom_path(data = borders_5f, aes(x=long, y=lat, group=group), size=0.25) +
   geom_point(data = grid.cell.locs, aes(x, y), color = "red", size=0.25, alpha=0.5) +
-  labs(x = "Easting", y = "Northing")
+  labs(x = "Easting", y = "Northing") +
+  theme_bw()
 
 
 
@@ -152,15 +153,15 @@ dat27<- left_join(dat27,grid.cell.locs, by="grid.cell")
 
 
 ggplot() +
-  geom_sf(data = usa) +
-  coord_sf(datum = NA) +
-  coord_sf(crs = "+init=epsg:32617", xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)),
+  geom_sf(data = fl) +
+  coord_sf(xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)),
            ylim = c(min(dat$utmlat-20000), max(dat$utmlat+20000)), expand = FALSE) +
   geom_tile(data=grid_5f, aes(x=x, y=y), fill="transparent") +
   geom_path(data = borders_5f, aes(x=long, y=lat, group=group), size=0.25) +
   geom_point(data = dat1, aes(grid.x, grid.y, color=time.seg), size=1) +
   scale_color_viridis_c("Time Segment") +
-  labs(x = "Easting", y = "Northing")
+  labs(x = "Easting", y = "Northing") +
+  theme_bw()
 
 
 
@@ -202,9 +203,8 @@ attr.cntrs27=id.attr.cntr(dat27, attr.cntrs27)
 
 
 ggplot() +
-  geom_sf(data = usa) +
-  coord_sf(datum = NA) +
-  coord_sf(crs = "+init=epsg:32617", xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)),
+  geom_sf(data = fl) +
+  coord_sf(xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)),
            ylim = c(min(dat$utmlat-20000), max(dat$utmlat+20000)), expand = FALSE) +
   geom_path(data = attr.cntrs1, aes(x=grid.x, y=grid.y)) +
   geom_point(data = attr.cntrs1, aes(x=grid.x, y=grid.y, color = time.seg), pch=21, stroke=1.25,
@@ -240,9 +240,8 @@ dat27$size<- n.per.tseg(dat27, dat.size27) %>% as.vector()
 
 
 ggplot() +
-  geom_sf(data = usa) +
-  coord_sf(datum = NA) +
-  coord_sf(crs = "+init=epsg:32617", xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)),
+  geom_sf(data = fl) +
+  coord_sf(xlim = c(min(dat$utmlong-20000), max(dat$utmlong+20000)),
            ylim = c(min(dat$utmlat-20000), max(dat$utmlat+20000)), expand = FALSE) +
   geom_path(data = dat1, aes(x=grid.x, y=grid.y), color="gray60", size=0.25) +
   geom_point(data = dat1, aes(x=grid.x, y=grid.y, color = as.numeric(time.seg)), pch=21,stroke=1.25,
@@ -265,25 +264,90 @@ library(plotly)
 Sys.setenv("plotly_username"="joshcullen")
 Sys.setenv("plotly_api_key"="qjYzTwjSylvlZnYmQzMk")
 
-time.scatter1 = plot_ly(attr.cntrs1, x=~grid.x, y=~grid.y, z=~time.seg, type="scatter3d", mode="lines+markers", color=~size, line = list(color = 'black', width = 1)) %>%
-                      layout(title="Attraction Centers of ID 1",
-                             scene=list(xaxis = list(title ="Easting"),
-                                                     yaxis = list(title = "Northing"),
-                                                     zaxis = list(title = "Time Segment")))
+#ID 1
+time.scatter1 = plot_ly() %>%
+  add_sf(data=fl, x=~x, y=~y, z=0, type="scatter3d", color=I("black")) %>%
+  add_trace(data=attr.cntrs1, x=~grid.x, y=~grid.y, z=0, type="scatter3d", mode="markers",
+            color=I("gray40")) %>%
+  add_trace(data=attr.cntrs1, x=~grid.x, y=~grid.y, z=~time.seg, type="scatter3d", mode="lines+markers", color=~size, line = list(color = 'black', width = 1)) %>%
+  layout(title="Attraction Centers of ID 1",
+         scene=list(xaxis = list(title ="Easting", range=c(min(dat$utmlong-50000),
+                                                           max(dat$utmlong+50000))),
+                    yaxis = list(title = "Northing", range=c(min(dat$utmlat-50000),
+                                                             max(dat$utmlat+50000))),
+                    zaxis = list(title = "Time Segment", range=c(0,nrow(attr.cntrs1)+1)),
+                    camera = list(eye = list(x = -1, y = -1.5, z = 1.5),
+                                  up = list(x=1, y=0, z=1), 
+                                  center=list(x=0, y=0, z=0))
+                    ))
+
+
+#ID 12
+time.scatter12 = plot_ly() %>%
+  add_sf(data=fl, x=~x, y=~y, z=0, type="scatter3d", color=I("black")) %>%
+  add_trace(data=attr.cntrs12, x=~grid.x, y=~grid.y, z=0, type="scatter3d", mode="markers",
+            color=I("gray40")) %>%
+  add_trace(data=attr.cntrs12, x=~grid.x, y=~grid.y, z=~time.seg, type="scatter3d", mode="lines+markers", color=~size, line = list(color = 'black', width = 1)) %>%
+  layout(title="Attraction Centers of ID 12",
+         scene=list(xaxis = list(title ="Easting", range=c(min(dat$utmlong-50000),
+                                                           max(dat$utmlong+50000))),
+                    yaxis = list(title = "Northing", range=c(min(dat$utmlat-50000),
+                                                             max(dat$utmlat+50000))),
+                    zaxis = list(title = "Time Segment", range=c(0,nrow(attr.cntrs12)+1)),
+                    camera = list(eye = list(x = -1, y = -1.5, z = 1.5),
+                                  up = list(x=1, y=0, z=1), 
+                                  center=list(x=0, y=0, z=0))
+         ))
+
+
+#ID 19
+time.scatter19 = plot_ly() %>%
+  add_sf(data=fl, x=~x, y=~y, z=0, type="scatter3d", color=I("black")) %>%
+  add_trace(data=attr.cntrs19, x=~grid.x, y=~grid.y, z=0, type="scatter3d", mode="markers",
+            color=I("gray40")) %>%
+  add_trace(data=attr.cntrs19, x=~grid.x, y=~grid.y, z=~time.seg, type="scatter3d", mode="lines+markers", color=~size, line = list(color = 'black', width = 1)) %>%
+  layout(title="Attraction Centers of ID 19",
+         scene=list(xaxis = list(title ="Easting", range=c(min(dat$utmlong-50000),
+                                                           max(dat$utmlong+50000))),
+                    yaxis = list(title = "Northing", range=c(min(dat$utmlat-50000),
+                                                             max(dat$utmlat+50000))),
+                    zaxis = list(title = "Time Segment", range=c(0,nrow(attr.cntrs19)+1)),
+                    camera = list(eye = list(x = -1, y = -1.5, z = 1.5),
+                                  up = list(x=1, y=0, z=1), 
+                                  center=list(x=0, y=0, z=0))
+         ))
+
+
+#ID 27
+time.scatter27 = plot_ly() %>%
+  add_sf(data=fl, x=~x, y=~y, z=0, type="scatter3d", color=I("black")) %>%
+  add_trace(data=attr.cntrs27, x=~grid.x, y=~grid.y, z=0, type="scatter3d", mode="markers",
+            color=I("gray40")) %>%
+  add_trace(data=attr.cntrs27, x=~grid.x, y=~grid.y, z=~time.seg, type="scatter3d", mode="lines+markers", color=~size, line = list(color = 'black', width = 1)) %>%
+  layout(title="Attraction Centers of ID 27",
+         scene=list(xaxis = list(title ="Easting", range=c(min(dat$utmlong-50000),
+                                                           max(dat$utmlong+50000))),
+                    yaxis = list(title = "Northing", range=c(min(dat$utmlat-50000),
+                                                             max(dat$utmlat+50000))),
+                    zaxis = list(title = "Time Segment", range=c(0,nrow(attr.cntrs27)+1)),
+                    camera = list(eye = list(x = -1, y = -1.5, z = 1.5),
+                                  up = list(x=1, y=0, z=1), 
+                                  center=list(x=0, y=0, z=0))
+         ))
+
+
+
+
+
 
 id1_3d<- api_create(time.scatter1)
+id12_3d<- api_create(time.scatter12)
+id19_3d<- api_create(time.scatter19)
+id27_3d<- api_create(time.scatter27)
+
 id1_3d
 
 
-### CONTINUE TO FIX FROM HERE ###
-
-
-plot_ly(attr.cntrs1, x=~grid.x, y=~grid.y, z=~time.seg, type="scatter3d", mode="lines+markers", color=~size, line = list(color = 'black', width = 1)) %>%
-  layout(title="Attraction Centers of ID 1",
-         scene=list(xaxis = list(title ="Easting"),
-                    yaxis = list(title = "Northing"),
-                    zaxis = list(title = "Time Segment"))) %>%
-  add_trace(data=usa3, x=~long, y=~lat, z=0, type="surface")
 
 
 
@@ -291,53 +355,7 @@ plot_ly(attr.cntrs1, x=~grid.x, y=~grid.y, z=~time.seg, type="scatter3d", mode="
 
 
 
-library(rgl)
-library(grid)
-library(gtable)
-
-open3d()
-plot3d(attr.cntrs1[,c(2,3,5)], type="s", radius=1e4, col="blue", axes=F, expand = 0,
-       xlim = c(min(dat$utmlong-50000), max(dat$utmlong+50000)),
-       ylim = c(min(dat$utmlat-50000), max(dat$utmlat+50000)),
-       zlim = c(0,nrow(attr.cntrs1)+1))
-plot3d(attr.cntrs1[,c(2,3,5)], type="h", col="blue", add=T)  # to test XY-coordinate (line segments from z = 0)
-axes3d(c("x","y","z") )
-show2d({                  # show2d uses 2D plot function's output as a texture on a box.
-  grid.draw(gtable_filter(ggplotGrob(base.map), "panel"))
-},
-expand = 1 , texmipmap = F )   # texmipmap = F makes tone clear (not essential)
-
-
-usa3<- fortify(usa3)
-
-ggplot() +
-  geom_polygon(data = usa3, aes(x=long,y=lat,group=group), fill='gray60') +
-  xlim(min(dat$utmlong-50000), max(dat$utmlong+50000)) +
-  ylim(min(dat$utmlat-50000), max(dat$utmlat+50000)) +
-  geom_point(data = attr.cntrs1, aes(x=grid.x, y=grid.y, color = time.seg), pch=21, stroke=1.25,
-             size=attr.cntrs1$size/nrow(dat1)*100) +
-  scale_color_viridis_c("Time Segment (n=49)") +
-  labs(x = "Easting", y = "Northing", title = "ID 1") +
-  theme_bw() +
-  coord_equal()
 
 
 
-base.map<- ggplot() +
-  geom_polygon(data = usa3, aes(x=long,y=lat,group=group), fill='gray60') +
-  theme_bw() +
-  labs(x="",y="") +
-  theme(axis.text = element_blank()) +
-  coord_equal(xlim=c(min(dat$utmlong-50000), max(dat$utmlong+50000)), ylim=c(min(dat$utmlat-50000),
-                                                                             max(dat$utmlat+50000))) +
-  geom_point(data=attr.cntrs1, aes(x=grid.x,y=grid.y), size=3, alpha=0.5)
 
-
-base.map2<- ggplot() +
-  geom_sf(data = usa) +
-  coord_sf(crs = "+init=epsg:32617", xlim = c(min(dat$utmlong-50000), max(dat$utmlong+50000)),
-           ylim = c(min(dat$utmlat-50000), max(dat$utmlat+50000)), expand = FALSE) +
-  theme_bw() +
-  labs(x="",y="") +
-  theme(axis.text = element_blank()) +
-  geom_point(data=attr.cntrs1, aes(x=grid.x,y=grid.y), size=3, alpha=0.5)
